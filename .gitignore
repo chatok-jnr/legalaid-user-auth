@@ -1,0 +1,27 @@
+# Maven build output
+/target/
+
+# Logs
+*.log
+logs/
+
+# Spring Boot runtime files
+*.pid
+*.seed
+*.pid.lock
+
+# IDE files
+/.idea/
+*.iml
+/.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment/local config
+.env
+.env.*
+
+# Backup files
+*~
