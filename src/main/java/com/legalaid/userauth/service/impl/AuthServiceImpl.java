@@ -67,6 +67,7 @@ public class AuthServiceImpl implements AuthService {
                 .dateOfBirth(request.getDateOfBirth())
                 .preferredLanguage(request.getPreferredLanguage())
                 .roles(roles)
+                .gender(request.getGender())
                 .build();
 
         userRepository.save(user);

@@ -2,6 +2,7 @@ package com.legalaid.userauth.dto.request;
 
 import com.legalaid.userauth.entity.Role;
 import jakarta.validation.constraints.*;
+import jakarta.validation.groups.Default;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -34,6 +35,9 @@ public class AuthRequests {
         private String phone;
 
         private LocalDate dateOfBirth;
+
+        @NotBlank(message = "Gender is required")
+        private String gender;
 
         @Size(max = 50)
         private String preferredLanguage;
