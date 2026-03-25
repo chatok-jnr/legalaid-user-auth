@@ -29,7 +29,6 @@ public class ClientServiceImpl implements ClientService {
 
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new AuthExceptions.UserNotFoundException("User with ID " + request.getUserId() + " not found"));
-
         ClientProfile clientProfile = ClientProfile.builder()
                 .user(user) // Only set user, not userId, for @MapsId
                 .emergencyContactName(request.getEmergencyContactName())

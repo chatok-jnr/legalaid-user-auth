@@ -30,8 +30,12 @@ public class LawyerServiceImpl implements LawyerService {
     @Transactional
     public LawyerResponse.LawyerProfileResponse registerLawyer(LawyerRequest.RegisterLawyer request, String email){
 
-        User user = userRepository.findById(request.getId())
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AuthExceptions.UserNotFoundException("User with ID " + request.getId() + "not found"));
+
+        if(!request.getId().equals(user.getId())) {
+            throw new AuthExceptions.UnauthorizedException();
+        }
 
         if(lawyerRepository.existsById(request.getId())) {
             throw new AuthExceptions.LawyerAlreadyExistException();
