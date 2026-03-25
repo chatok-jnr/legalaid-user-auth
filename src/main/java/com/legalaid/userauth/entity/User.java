@@ -46,6 +46,9 @@ public class User {
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
+    @Column(name = "gender", nullable = false)
+    private String gender;
+
     @Column(name = "preferred_language", length = 50)
     private String preferredLanguage;
 

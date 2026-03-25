@@ -70,6 +70,36 @@ public class GlobalExceptionHandler {
         return buildProblem(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
+    @ExceptionHandler(AuthExceptions.ClientAlreadyExistException.class)
+    public ProblemDetail handleClientAlreadyExists(AuthExceptions.ClientAlreadyExistException ex) {
+        return buildProblem(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthExceptions.ClientNotFoundException.class)
+    public ProblemDetail handleClientNotFound(AuthExceptions.ClientNotFoundException ex) {
+        return buildProblem(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthExceptions.LawyerAlreadyExistException.class)
+    public ProblemDetail handleLawyerAlreadyExists(AuthExceptions.LawyerAlreadyExistException ex) {
+        return buildProblem(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthExceptions.LawyerNotFoundException.class)
+    public ProblemDetail handleLawyerNotFound(AuthExceptions.LawyerNotFoundException ex) {
+        return buildProblem(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthExceptions.UnauthorizedException.class)
+    public ProblemDetail handleUnauthorized(AuthExceptions.UnauthorizedException ex) {
+        return buildProblem(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthExceptions.InvalidRoleException.class)
+    public ProblemDetail handleInvalidRole(AuthExceptions.InvalidRoleException ex) {
+        return buildProblem(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+
     // ── Spring Security exceptions ────────────────────────────────────────────
 
     @ExceptionHandler(AuthenticationException.class)
