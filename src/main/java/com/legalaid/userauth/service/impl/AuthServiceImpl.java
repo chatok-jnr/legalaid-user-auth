@@ -57,6 +57,11 @@ public class AuthServiceImpl implements AuthService {
 
         // Resolve roles — default to CLIENT if none supplied
         Set<Role> roles = resolveRoles(request.getRoles());
+        for (Role role : roles) {
+            if (role.getName() != Role.RoleName.CLIENT) {
+                throw new AuthExceptions.InvalidRoleException("Only CLIENT role is allowed");
+            }
+        }
 
         User user = User.builder()
                 .fullName(request.getFullName())

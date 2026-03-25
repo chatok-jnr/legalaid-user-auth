@@ -73,6 +73,7 @@ Register a new user. Returns a token pair so the user is immediately logged in.
   "phone": "+880123456789",
   "dateOfBirth": "1990-06-15",
   "preferredLanguage": "en",
+  "gender": "Male",
   "roles": ["CLIENT"]
 }
 ```
@@ -165,6 +166,75 @@ Update the authenticated user's own profile. All fields are optional (PATCH sema
 
 ---
 
+### Client Endpoints (`CLIENT` role)
+Include the header: `Authorization: Bearer <accessToken>`
+
+#### `POST /auth/client/profile`
+Create a client profile for the authenticated client user.
+
+**Request body**
+```json
+{
+  "userId": "550e8400-e29b-41d4-a716-446655440000",
+  "emergencyContactName": "John Doe",
+  "emergencyContactPhone": "+8801712345678",
+  "notes": "Allergic to penicillin"
+}
+```
+
+> `userId` is validated in the DTO. In the current controller implementation, backend resolves the authenticated user and sets `userId` server-side before service execution.
+
+**Response `201 Created`**
+```json
+{
+  "emergencyContactName": "John Doe",
+  "emergencyContactPhone": "+8801712345678",
+  "notes": "Allergic to penicillin",
+  "createdAt": "2026-03-23T10:30:00Z"
+}
+```
+
+---
+
+#### `GET /auth/client/profile`
+Fetch the authenticated client's profile.
+
+**Response `200 OK`**
+```json
+{
+  "emergencyContactName": "John Doe",
+  "emergencyContactPhone": "+8801712345678",
+  "notes": "Allergic to penicillin",
+  "createdAt": "2026-03-23T10:30:00Z"
+}
+```
+
+---
+
+#### `PATCH /auth/client/profile`
+Update authenticated client's profile fields. PATCH semantics apply (only non-null fields are updated).
+
+**Request body**
+```json
+{
+  "userId": "550e8400-e29b-41d4-a716-446655440000",
+  "emergencyContactName": "Updated Name",
+  "notes": "Updated private notes"
+}
+```
+
+**Response `200 OK`**
+```json
+{
+  "emergencyContactName": "Updated Name",
+  "emergencyContactPhone": "+8801712345678",
+  "notes": "Updated private notes",
+  "createdAt": "2026-03-23T10:30:00Z"
+}
+```
+
+---
+
 ## RBAC Summary
 
 | Endpoint              | Roles Required          |
@@ -174,6 +244,9 @@ Update the authenticated user's own profile. All fields are optional (PATCH sema
 | `POST /auth/refresh`  | Public                  |
 | `GET  /auth/me`       | Any authenticated user  |
 | `PATCH /auth/me`      | Any authenticated user  |
+| `POST /auth/client/profile`     | `CLIENT` only           |
+| `GET  /auth/client/profile`     | `CLIENT` only           |
+| `PATCH /auth/client/profile`    | `CLIENT` only           |
 | `GET  /admin/**`      | `ADMIN` only            |
 | `GET  /lawyers/**`    | `LAWYER` or `ADMIN`     |
 
@@ -216,26 +289,42 @@ src/main/java/com/legalaid/userauth/
 │   ├── JwtProperties.java          # Binds app.jwt.* from application.yml
 │   └── SecurityConfig.java         # Spring Security + RBAC filter chain
 ├── controller/
-│   └── AuthController.java         # REST endpoints
+│   ├── AuthController.java         # Auth endpoints
+│   └── ClientController.java       # Client profile endpoints
 ├── dto/
-│   ├── request/AuthRequests.java   # Register, Login, Refresh, UpdateProfile
-│   └── response/AuthResponses.java # TokenResponse, UserResponse, MessageResponse
+│   ├── request/
+│   │   ├── AuthRequests.java
+│   │   └── client/ClientProfileRequest.java
+│   └── response/
+│       ├── AuthResponses.java
+│       └── client/ClientProfileResponse.java
 ├── entity/
 │   ├── User.java
 │   ├── Role.java                   # CLIENT | LAWYER | ADMIN
-│   └── RefreshToken.java
+│   ├── RefreshToken.java
+│   └── client/
+│       ├── ClientProfile.java
+│       ├── ClientAddress.java
+│       ├── ClientAddressId.java
+│       └── LocationType.java
 ├── exception/
 │   ├── AuthExceptions.java         # Domain exception classes
 │   └── GlobalExceptionHandler.java # RFC 9457 ProblemDetail responses
 ├── repository/
 │   ├── UserRepository.java
 │   ├── RoleRepository.java
-│   └── RefreshTokenRepository.java
+│   ├── RefreshTokenRepository.java
+│   └── client/
+│       ├── ClientProfileRepository.java
+│       └── ClientAddressRepository.java
 ├── security/
 │   ├── JwtService.java             # Token generation & validation
 │   ├── JwtAuthenticationFilter.java
 │   └── UserDetailsServiceImpl.java
 └── service/
-    ├── AuthService.java            # Interface
-    └── impl/AuthServiceImpl.java   # Business logic
+    ├── AuthService.java
+    ├── impl/AuthServiceImpl.java
+    └── client/
+        ├── ClientService.java
+        └── impl/ClientServiceImpl.java
 ```
