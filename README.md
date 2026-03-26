@@ -180,6 +180,102 @@ Update the authenticated user's own profile. All fields are optional (PATCH sema
 
 ---
 
+### Address Endpoints (authenticated users)
+Include the header: `Authorization: Bearer <accessToken>`
+
+#### `POST /auth/addresses`
+Create an address for the authenticated user.
+
+**Request body**
+```json
+{
+  "addressType": "HOME",
+  "division": "Dhaka",
+  "district": "Dhaka",
+  "city": "Dhaka",
+  "postalCode": "1207",
+  "street": "House 12, Road 7"
+}
+```
+
+> `addressType` is used as part of the unique key per user (for example: `HOME`, `OFFICE`).
+> `user_id` exists in the DTO but is not used by this controller flow.
+
+**Response `201 Created`**
+```json
+{
+  "addressType": "HOME",
+  "division": "Dhaka",
+  "district": "Dhaka",
+  "city": "Dhaka",
+  "postalCode": "1207",
+  "street": "House 12, Road 7"
+}
+```
+
+**Common error responses**
+- `409 Conflict` if the same `addressType` already exists for the authenticated user.
+- `404 Not Found` if the authenticated user cannot be resolved.
+
+---
+
+#### `PATCH /auth/addresses`
+Update an existing address for the authenticated user. PATCH semantics apply (only non-null fields are updated).
+
+**Request body**
+```json
+{
+  "addressType": "HOME",
+  "city": "New Dhaka",
+  "street": "House 22, Road 9"
+}
+```
+
+**Response `200 OK`**
+```json
+{
+  "addressType": "HOME",
+  "division": "Dhaka",
+  "district": "Dhaka",
+  "city": "New Dhaka",
+  "postalCode": "1207",
+  "street": "House 22, Road 9"
+}
+```
+
+**Common error responses**
+- `400 Bad Request` when `addressType` is missing.
+- `404 Not Found` when no address exists for the requested `addressType`.
+
+---
+
+#### `GET /auth/addresses`
+Fetch all addresses for the authenticated user.
+
+**Response `200 OK`**
+```json
+[
+  {
+    "addressType": "HOME",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "city": "Dhaka",
+    "postalCode": "1207",
+    "street": "House 12, Road 7"
+  },
+  {
+    "addressType": "OFFICE",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "city": "Dhaka",
+    "postalCode": "1212",
+    "street": "Tejgaon Industrial Area"
+  }
+]
+```
+
+---
+
 ### Client Endpoints (`CLIENT` role)
 Include the header: `Authorization: Bearer <accessToken>`
 
@@ -333,6 +429,9 @@ Fetch the authenticated lawyer's profile.
 | `POST /auth/refresh`  | Public                  |
 | `GET  /auth/me`       | Any authenticated user  |
 | `PATCH /auth/me`      | Any authenticated user  |
+| `POST /auth/addresses`| Any authenticated user  |
+| `PATCH /auth/addresses`| Any authenticated user |
+| `GET  /auth/addresses`| Any authenticated user  |
 | `POST /auth/client/profile`     | `CLIENT` only           |
 | `GET  /auth/client/profile`     | `CLIENT` only           |
 | `PATCH /auth/client/profile`    | `CLIENT` only           |

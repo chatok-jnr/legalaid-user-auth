@@ -98,4 +98,26 @@ public class AuthExceptions {
             super("Unauthorized to perform this action");
         }
     }
+
+    // ---------------- User Address ------------------
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public static class AddressTypeRequiredException extends RuntimeException {
+        public AddressTypeRequiredException() {
+            super("Address type is required");
+        }
+    }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public static class AddressAlreadyExistsException extends RuntimeException {
+        public AddressAlreadyExistsException(String username, String addressType) {
+            super("For " + username + " " + addressType + " address already exists");
+        }
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public static class AddressNotFoundException extends RuntimeException {
+        public AddressNotFoundException(String addressType) {
+            super("Address not found for type: " + addressType);
+        }
+    }
 }

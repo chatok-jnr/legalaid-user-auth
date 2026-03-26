@@ -10,7 +10,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.net.URI;
 import java.time.Instant;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -98,6 +97,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthExceptions.InvalidRoleException.class)
     public ProblemDetail handleInvalidRole(AuthExceptions.InvalidRoleException ex) {
         return buildProblem(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthExceptions.AddressTypeRequiredException.class)
+    public ProblemDetail handleAddressTypeRequired(AuthExceptions.AddressTypeRequiredException ex) {
+        return buildProblem(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthExceptions.AddressAlreadyExistsException.class)
+    public ProblemDetail handleAddressAlreadyExists(AuthExceptions.AddressAlreadyExistsException ex) {
+        return buildProblem(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthExceptions.AddressNotFoundException.class)
+    public ProblemDetail handleAddressNotFound(AuthExceptions.AddressNotFoundException ex) {
+        return buildProblem(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     // ── Spring Security exceptions ────────────────────────────────────────────
