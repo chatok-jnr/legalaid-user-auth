@@ -31,6 +31,10 @@ REST API microservice for user authentication and profile management. Part of th
 | `DB_USERNAME`             | `postgres`                     | PostgreSQL username              |
 | `DB_PASSWORD`             | `postgres`                     | PostgreSQL password              |
 | `JWT_SECRET`              | *(long default in yml)*        | HMAC-SHA256 signing key (≥256 b)|
+| `CLOUDINARY_CLOUD_NAME`   | *(required)*                   | Cloudinary cloud name            |
+| `CLOUDINARY_API_KEY`      | *(required)*                   | Cloudinary API key               |
+| `CLOUDINARY_API_SECRET`   | *(required)*                   | Cloudinary API secret            |
+| `CLOUDINARY_UPLOAD_FOLDER` | `Home/legalAid/lawyer-profile-documents` | Cloudinary upload folder |
 
 > **Production**: always set `JWT_SECRET` to a securely generated random value.
 > Generate one with: `openssl rand -base64 64`
@@ -417,6 +421,34 @@ Fetch the authenticated lawyer's profile.
   "updatedAt": "2026-03-25T10:00:00Z"
 }
 ```
+
+---
+
+#### `POST /auth/lawyer/profile/document`
+Upload a profile document to Cloudinary for the authenticated lawyer.
+
+**Request**
+- `multipart/form-data`
+- part name: `document`
+
+**Response `200 OK`**
+```json
+{
+  "documentUrl": "https://res.cloudinary.com/..."
+}
+```
+
+---
+
+## Environment
+
+Cloudinary is configured through these environment variables:
+- `CLOUDINARY_CLOUD_NAME`
+- `CLOUDINARY_API_KEY`
+- `CLOUDINARY_API_SECRET`
+- `CLOUDINARY_UPLOAD_FOLDER`
+
+The default upload folder now targets lawyer profile documents.
 
 ---
 

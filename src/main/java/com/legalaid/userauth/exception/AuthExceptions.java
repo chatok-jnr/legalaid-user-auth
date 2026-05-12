@@ -99,6 +99,28 @@ public class AuthExceptions {
         }
     }
 
+    // ---------------- Admin ------------------
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public static class AdminAlreadyExistException extends RuntimeException {
+        public AdminAlreadyExistException() {
+            super("Admin profile already exists for this user");
+        }
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public static class AdminNotFoundException extends RuntimeException {
+        public AdminNotFoundException() {
+            super("Admin profile not found for this user");
+        }
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public static class InvalidIpAddressException extends RuntimeException {
+        public InvalidIpAddressException(String ipAddress) {
+            super("Invalid IP address: " + ipAddress);
+        }
+    }
+
     // ---------------- User Address ------------------
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public static class AddressTypeRequiredException extends RuntimeException {
@@ -118,6 +140,21 @@ public class AuthExceptions {
     public static class AddressNotFoundException extends RuntimeException {
         public AddressNotFoundException(String addressType) {
             super("Address not found for type: " + addressType);
+        }
+    }
+
+    // ---------------- Upload ------------------
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public static class InvalidUploadException extends RuntimeException {
+        public InvalidUploadException() {
+            super("A document file is required");
+        }
+    }
+
+    @ResponseStatus(HttpStatus.BAD_GATEWAY)
+    public static class CloudinaryUploadException extends RuntimeException {
+        public CloudinaryUploadException(String message) {
+            super(message);
         }
     }
 }

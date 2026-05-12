@@ -99,6 +99,21 @@ public class GlobalExceptionHandler {
         return buildProblem(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
+    @ExceptionHandler(AuthExceptions.AdminAlreadyExistException.class)
+    public ProblemDetail handleAdminAlreadyExists(AuthExceptions.AdminAlreadyExistException ex) {
+        return buildProblem(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthExceptions.AdminNotFoundException.class)
+    public ProblemDetail handleAdminNotFound(AuthExceptions.AdminNotFoundException ex) {
+        return buildProblem(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthExceptions.InvalidIpAddressException.class)
+    public ProblemDetail handleInvalidIpAddress(AuthExceptions.InvalidIpAddressException ex) {
+        return buildProblem(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
     @ExceptionHandler(AuthExceptions.AddressTypeRequiredException.class)
     public ProblemDetail handleAddressTypeRequired(AuthExceptions.AddressTypeRequiredException ex) {
         return buildProblem(HttpStatus.BAD_REQUEST, ex.getMessage());
@@ -112,6 +127,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthExceptions.AddressNotFoundException.class)
     public ProblemDetail handleAddressNotFound(AuthExceptions.AddressNotFoundException ex) {
         return buildProblem(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthExceptions.InvalidUploadException.class)
+    public ProblemDetail handleInvalidUpload(AuthExceptions.InvalidUploadException ex) {
+        return buildProblem(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthExceptions.CloudinaryUploadException.class)
+    public ProblemDetail handleCloudinaryUpload(AuthExceptions.CloudinaryUploadException ex) {
+        return buildProblem(HttpStatus.BAD_GATEWAY, ex.getMessage());
     }
 
     // ── Spring Security exceptions ────────────────────────────────────────────
