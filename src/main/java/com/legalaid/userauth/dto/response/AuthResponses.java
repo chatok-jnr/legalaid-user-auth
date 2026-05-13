@@ -45,4 +45,10 @@ public class AuthResponses {
     public static class MessageResponse {
         private String message;
     }
+
+    @Data
+    @Builder
+    public static class UserDeleteResponse {
+
+    }
 }

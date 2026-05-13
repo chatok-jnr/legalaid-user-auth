@@ -10,7 +10,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.net.URI;
 import java.time.Instant;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -90,6 +89,11 @@ public class GlobalExceptionHandler {
         return buildProblem(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
+    @ExceptionHandler(AuthExceptions.InvalidStatusUpdateException.class)
+    public ProblemDetail handleInvalidStatusUpdate(AuthExceptions.InvalidStatusUpdateException ex) {
+        return buildProblem(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
     @ExceptionHandler(AuthExceptions.UnauthorizedException.class)
     public ProblemDetail handleUnauthorized(AuthExceptions.UnauthorizedException ex) {
         return buildProblem(HttpStatus.FORBIDDEN, ex.getMessage());
@@ -98,6 +102,46 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthExceptions.InvalidRoleException.class)
     public ProblemDetail handleInvalidRole(AuthExceptions.InvalidRoleException ex) {
         return buildProblem(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthExceptions.AdminAlreadyExistException.class)
+    public ProblemDetail handleAdminAlreadyExists(AuthExceptions.AdminAlreadyExistException ex) {
+        return buildProblem(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthExceptions.AdminNotFoundException.class)
+    public ProblemDetail handleAdminNotFound(AuthExceptions.AdminNotFoundException ex) {
+        return buildProblem(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthExceptions.InvalidIpAddressException.class)
+    public ProblemDetail handleInvalidIpAddress(AuthExceptions.InvalidIpAddressException ex) {
+        return buildProblem(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthExceptions.AddressTypeRequiredException.class)
+    public ProblemDetail handleAddressTypeRequired(AuthExceptions.AddressTypeRequiredException ex) {
+        return buildProblem(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthExceptions.AddressAlreadyExistsException.class)
+    public ProblemDetail handleAddressAlreadyExists(AuthExceptions.AddressAlreadyExistsException ex) {
+        return buildProblem(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthExceptions.AddressNotFoundException.class)
+    public ProblemDetail handleAddressNotFound(AuthExceptions.AddressNotFoundException ex) {
+        return buildProblem(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthExceptions.InvalidUploadException.class)
+    public ProblemDetail handleInvalidUpload(AuthExceptions.InvalidUploadException ex) {
+        return buildProblem(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthExceptions.CloudinaryUploadException.class)
+    public ProblemDetail handleCloudinaryUpload(AuthExceptions.CloudinaryUploadException ex) {
+        return buildProblem(HttpStatus.BAD_GATEWAY, ex.getMessage());
     }
 
     // ── Spring Security exceptions ────────────────────────────────────────────

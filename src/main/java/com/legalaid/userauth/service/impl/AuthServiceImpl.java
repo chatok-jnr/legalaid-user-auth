@@ -164,6 +164,18 @@ public class AuthServiceImpl implements AuthService {
         return toUserResponse(user);
     }
 
+    @Override
+    @Transactional
+    public AuthResponses.UserDeleteResponse deleteProfile(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AuthExceptions.UserNotFoundException(email));
+
+        userRepository.delete(user);
+
+        return AuthResponses.UserDeleteResponse.builder()
+                .build();
+    }
+
     // ── Private helpers ───────────────────────────────────────────────────────
 
     private AuthResponses.TokenResponse buildTokenResponse(User user) {

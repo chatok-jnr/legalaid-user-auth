@@ -87,4 +87,12 @@ public class AuthController {
     ) {
         return ResponseEntity.ok(authService.updateProfile(principal.getUsername(), request));
     }
+
+    @DeleteMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<AuthResponses.UserDeleteResponse> deleteProfile(
+            @AuthenticationPrincipal UserDetails principal
+    ) {
+        return ResponseEntity.ok(authService.deleteProfile(principal.getUsername()));
+    }
 }

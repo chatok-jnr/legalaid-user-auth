@@ -1,14 +1,13 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: user-auth
 
   datasource:
-    url: jdbc:postgresql://ep-old-surf-a1gittp7-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
-
-    username: ${DB_USERNAME:neondb_owner}
-
-    password: ${DB_PASSWORD:npg_c3tJkuFvb0so}
-
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/legal_aid}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -27,15 +26,21 @@ spring:
         format_sql: true
 
 server:
-  port: 8081
+  port: ${SERVER_PORT:8081}
   servlet:
-    context-path: /api/v1
+    context-path: ${SERVER_CONTEXT_PATH:/api/v1}
 
 app:
   jwt:
-    secret: ${JWT_SECRET:ThisIsAVeryLongSecretKeyForLegalAidPlatformThatMustBeAtLeast256BitsLong!}
-    access-token-expiration-ms: 900000        # 15 minutes
-    refresh-token-expiration-days: 30
+    secret: ${JWT_SECRET:change-me-to-a-secure-random-base64-value}
+    access-token-expiration-ms: ${JWT_ACCESS_TOKEN_EXPIRATION_MS:900000}
+    refresh-token-expiration-days: ${JWT_REFRESH_TOKEN_EXPIRATION_DAYS:30}
+  cloudinary:
+    cloud-name: ${CLOUDINARY_CLOUD_NAME:}
+    api-key: ${CLOUDINARY_API_KEY:}
+    api-secret: ${CLOUDINARY_API_SECRET:}
+    upload-folder: ${CLOUDINARY_UPLOAD_FOLDER:Home/legalAid/lawyer-profile-documents}
+    upload-url-template: ${CLOUDINARY_UPLOAD_URL_TEMPLATE:https://api.cloudinary.com/v1_1/%s/auto/upload}
 
 logging:
   level:

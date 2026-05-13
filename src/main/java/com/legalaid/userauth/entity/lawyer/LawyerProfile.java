@@ -4,12 +4,12 @@ import com.legalaid.userauth.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcType;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.*;
 
 @Entity
@@ -45,19 +45,25 @@ public class LawyerProfile {
     private short yearsExperience;
 
     @Column(name = "is_verified")
-    private boolean isVerified;
+    private Boolean isVerified;
+
+    @Enumerated(EnumType.STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
+    @Column(name = "status", columnDefinition = "lawyer_status")
+    @Builder.Default
+    LawyerStatus status = LawyerStatus.PENDING;
 
     @Column(name = "verifiedBy")
     private UUID verifiedBy;
 
     @Column(name = "verified_at")
-    private OffsetDateTime verifiedAt;
+    private Instant verifiedAt;
 
     @CreationTimestamp
     @Column(name = "created_at")
-    private OffsetDateTime createdAt;
+    private Instant createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at")
-    private OffsetDateTime updatedAt;
+    private Instant updatedAt;
 }

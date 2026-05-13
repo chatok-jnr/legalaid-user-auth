@@ -16,4 +16,6 @@ public interface AuthService {
     AuthResponses.UserResponse getProfile(String email);
 
     AuthResponses.UserResponse updateProfile(String email, AuthRequests.UpdateProfileRequest request);
+
+    AuthResponses.UserDeleteResponse deleteProfile(String email);
 }

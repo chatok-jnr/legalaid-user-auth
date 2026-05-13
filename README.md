@@ -31,6 +31,10 @@ REST API microservice for user authentication and profile management. Part of th
 | `DB_USERNAME`             | `postgres`                     | PostgreSQL username              |
 | `DB_PASSWORD`             | `postgres`                     | PostgreSQL password              |
 | `JWT_SECRET`              | *(long default in yml)*        | HMAC-SHA256 signing key (≥256 b)|
+| `CLOUDINARY_CLOUD_NAME`   | *(required)*                   | Cloudinary cloud name            |
+| `CLOUDINARY_API_KEY`      | *(required)*                   | Cloudinary API key               |
+| `CLOUDINARY_API_SECRET`   | *(required)*                   | Cloudinary API secret            |
+| `CLOUDINARY_UPLOAD_FOLDER` | `Home/legalAid/lawyer-profile-documents` | Cloudinary upload folder |
 
 > **Production**: always set `JWT_SECRET` to a securely generated random value.
 > Generate one with: `openssl rand -base64 64`
@@ -180,6 +184,102 @@ Update the authenticated user's own profile. All fields are optional (PATCH sema
 
 ---
 
+### Address Endpoints (authenticated users)
+Include the header: `Authorization: Bearer <accessToken>`
+
+#### `POST /auth/addresses`
+Create an address for the authenticated user.
+
+**Request body**
+```json
+{
+  "addressType": "HOME",
+  "division": "Dhaka",
+  "district": "Dhaka",
+  "city": "Dhaka",
+  "postalCode": "1207",
+  "street": "House 12, Road 7"
+}
+```
+
+> `addressType` is used as part of the unique key per user (for example: `HOME`, `OFFICE`).
+> `user_id` exists in the DTO but is not used by this controller flow.
+
+**Response `201 Created`**
+```json
+{
+  "addressType": "HOME",
+  "division": "Dhaka",
+  "district": "Dhaka",
+  "city": "Dhaka",
+  "postalCode": "1207",
+  "street": "House 12, Road 7"
+}
+```
+
+**Common error responses**
+- `409 Conflict` if the same `addressType` already exists for the authenticated user.
+- `404 Not Found` if the authenticated user cannot be resolved.
+
+---
+
+#### `PATCH /auth/addresses`
+Update an existing address for the authenticated user. PATCH semantics apply (only non-null fields are updated).
+
+**Request body**
+```json
+{
+  "addressType": "HOME",
+  "city": "New Dhaka",
+  "street": "House 22, Road 9"
+}
+```
+
+**Response `200 OK`**
+```json
+{
+  "addressType": "HOME",
+  "division": "Dhaka",
+  "district": "Dhaka",
+  "city": "New Dhaka",
+  "postalCode": "1207",
+  "street": "House 22, Road 9"
+}
+```
+
+**Common error responses**
+- `400 Bad Request` when `addressType` is missing.
+- `404 Not Found` when no address exists for the requested `addressType`.
+
+---
+
+#### `GET /auth/addresses`
+Fetch all addresses for the authenticated user.
+
+**Response `200 OK`**
+```json
+[
+  {
+    "addressType": "HOME",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "city": "Dhaka",
+    "postalCode": "1207",
+    "street": "House 12, Road 7"
+  },
+  {
+    "addressType": "OFFICE",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "city": "Dhaka",
+    "postalCode": "1212",
+    "street": "Tejgaon Industrial Area"
+  }
+]
+```
+
+---
+
 ### Client Endpoints (`CLIENT` role)
 Include the header: `Authorization: Bearer <accessToken>`
 
@@ -324,6 +424,34 @@ Fetch the authenticated lawyer's profile.
 
 ---
 
+#### `POST /auth/lawyer/profile/document`
+Upload a profile document to Cloudinary for the authenticated lawyer.
+
+**Request**
+- `multipart/form-data`
+- part name: `document`
+
+**Response `200 OK`**
+```json
+{
+  "documentUrl": "https://res.cloudinary.com/..."
+}
+```
+
+---
+
+## Environment
+
+Cloudinary is configured through these environment variables:
+- `CLOUDINARY_CLOUD_NAME`
+- `CLOUDINARY_API_KEY`
+- `CLOUDINARY_API_SECRET`
+- `CLOUDINARY_UPLOAD_FOLDER`
+
+The default upload folder now targets lawyer profile documents.
+
+---
+
 ## RBAC Summary
 
 | Endpoint              | Roles Required          |
@@ -333,6 +461,9 @@ Fetch the authenticated lawyer's profile.
 | `POST /auth/refresh`  | Public                  |
 | `GET  /auth/me`       | Any authenticated user  |
 | `PATCH /auth/me`      | Any authenticated user  |
+| `POST /auth/addresses`| Any authenticated user  |
+| `PATCH /auth/addresses`| Any authenticated user |
+| `GET  /auth/addresses`| Any authenticated user  |
 | `POST /auth/client/profile`     | `CLIENT` only           |
 | `GET  /auth/client/profile`     | `CLIENT` only           |
 | `PATCH /auth/client/profile`    | `CLIENT` only           |
