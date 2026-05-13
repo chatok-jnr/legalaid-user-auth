@@ -10,14 +10,17 @@ import com.legalaid.userauth.entity.Role;
 import com.legalaid.userauth.entity.User;
 import com.legalaid.userauth.entity.UserRole;
 import com.legalaid.userauth.entity.UserRoleId;
+import com.legalaid.userauth.entity.admin.AdminProfile;
 import com.legalaid.userauth.entity.lawyer.LawyerCredential;
 import com.legalaid.userauth.entity.lawyer.LawyerProfile;
+import com.legalaid.userauth.entity.lawyer.LawyerStatus;
 import com.legalaid.userauth.exception.AuthExceptions;
 import com.legalaid.userauth.repository.RoleRepository;
 import com.legalaid.userauth.repository.UserRepository;
 import com.legalaid.userauth.repository.UserRoleRepository;
 import com.legalaid.userauth.repository.lawyer.LawyerCredentialRepository;
 import com.legalaid.userauth.repository.lawyer.LawyerRepository;
+import com.legalaid.userauth.repository.lawyer.projection.LawyerDetailsProjectionForAdmin;
 import com.legalaid.userauth.repository.lawyer.projection.LawyerProfileProjection;
 import com.legalaid.userauth.service.cloudinary.CloudinaryService;
 import com.legalaid.userauth.service.lawyer.LawyerService;
@@ -30,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -173,6 +177,53 @@ public class LawyerServiceImpl implements LawyerService {
                 .build();
     }
 
+    @Override
+    public List<LawyerResponse.LawyerDetailsForAdmin> getAllLawyerForAdmin(LawyerStatus status) {
+        List<LawyerDetailsProjectionForAdmin> lawyerDetails = lawyerRepository.findAllLawyerDetailsForAdmin(status.name());
+        List<LawyerResponse.LawyerDetailsForAdmin> response = new ArrayList<>();
+
+        for(LawyerDetailsProjectionForAdmin lawyerDetailsProjection : lawyerDetails) {
+            response.add(LawyerResponse.LawyerDetailsForAdmin.builder()
+                    .id(lawyerDetailsProjection.getId())
+                    .profilePicUlr(lawyerDetailsProjection.getProfilePicUrl())
+                    .fullName(lawyerDetailsProjection.getFullName())
+                    .email(lawyerDetailsProjection.getEmail())
+                    .specializations(lawyerDetailsProjection.getSpecializations())
+                    .experience(lawyerDetailsProjection.getExperience())
+                    .applied(lawyerDetailsProjection.getApplied())
+                    .isVerified(lawyerDetailsProjection.getIsVerified())
+                    .verifiedAt(lawyerDetailsProjection.getVerifiedAt())
+                    .verifiedBy(lawyerDetailsProjection.getVerifiedBy())
+                    .documents(parseDocuments4Admin(lawyerDetailsProjection.getDocuments()))
+                    .build());
+        }
+
+        return response;
+    }
+
+    @Override
+    @Transactional
+    public void updLawyerStatus(UUID lawyerId, String status, String adminEmail) {
+        LawyerProfile lawyerProfile = lawyerRepository.findById(lawyerId)
+                .orElseThrow(AuthExceptions.LawyerNotFoundException::new);
+
+        User admin = userRepository.findByEmail(adminEmail)
+                .orElseThrow(() -> new AuthExceptions.UserNotFoundException("Admin user not found"));
+
+        if(lawyerProfile.getStatus().equals(LawyerStatus.valueOf(status))) {
+            throw new AuthExceptions.InvalidStatusUpdateException("Lawyer is already in " + status + " status");
+        }
+
+        lawyerProfile.setStatus(LawyerStatus.valueOf(status.toUpperCase()));
+        if(status.toUpperCase().equals("APPROVED")) {
+            lawyerProfile.setIsVerified(true);
+            lawyerProfile.setVerifiedAt(Instant.now());
+            lawyerProfile.setVerifiedBy(admin.getId());
+        }
+
+        lawyerRepository.save(lawyerProfile);
+    }
+
 
     // ===================================
     // Functions
@@ -184,7 +235,7 @@ public class LawyerServiceImpl implements LawyerService {
                 .bio(request.getBio())
                 .specializations(request.getSpecializations())
                 .yearsExperience(request.getYearsExperience())
-                .isVerified(request.isVerified())
+                .isVerified(request.getIsVerified())
                 .build();
     }
 
@@ -198,8 +249,19 @@ public class LawyerServiceImpl implements LawyerService {
             return List.of();
         }
     }
-}
 
+
+    private List<LawyerResponse.Doc4Admin> parseDocuments4Admin(String credentials) {
+        try {
+            return (credentials == null || credentials.isBlank())
+                    ? List.of()
+                    : objectMapper.readValue(credentials, new TypeReference<>() {});
+        } catch (Exception e) {
+            log.error("Error parsing delivery files JSON: {}", e.getMessage());
+            return List.of();
+        }
+    }
+}
 
 
 

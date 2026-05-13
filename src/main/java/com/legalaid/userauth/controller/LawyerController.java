@@ -4,6 +4,7 @@ import com.legalaid.userauth.dto.request.lawyer.LawyerCredentialRequest;
 import com.legalaid.userauth.dto.request.lawyer.LawyerRequest;
 import com.legalaid.userauth.dto.response.lawyer.LawyerCredentialResponse;
 import com.legalaid.userauth.dto.response.lawyer.LawyerResponse;
+import com.legalaid.userauth.entity.lawyer.LawyerStatus;
 import com.legalaid.userauth.service.lawyer.LawyerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("auth/lawyer")
@@ -79,5 +82,26 @@ public class LawyerController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(lawyerService.addLawyerCredential(request, auth.getName()));
+    }
+
+    // 4 Admins ------------------------------------
+    @GetMapping("/admin/{status}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<LawyerResponse.LawyerDetailsForAdmin>> getAllLawyerForAdmin(
+            @PathVariable String status
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(lawyerService.getAllLawyerForAdmin(LawyerStatus.valueOf(status.toUpperCase())));
+    }
+
+    @PatchMapping("/admin/{lawyerId}/{status}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public void updateLawyerStatus(
+            @PathVariable String lawyerId,
+            @PathVariable String status,
+            Authentication auth
+    ) {
+        lawyerService.updLawyerStatus(java.util.UUID.fromString(lawyerId), status, auth.getName());
     }
 }

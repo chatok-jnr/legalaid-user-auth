@@ -92,6 +92,13 @@ public class AuthExceptions {
         }
     }
 
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public static class InvalidStatusUpdateException extends RuntimeException {
+        public InvalidStatusUpdateException(String message) {
+            super(message);
+        }
+    }
+
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public static class UnauthorizedException extends RuntimeException {
         public UnauthorizedException() {

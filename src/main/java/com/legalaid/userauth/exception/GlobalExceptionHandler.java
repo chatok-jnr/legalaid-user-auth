@@ -89,6 +89,11 @@ public class GlobalExceptionHandler {
         return buildProblem(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
+    @ExceptionHandler(AuthExceptions.InvalidStatusUpdateException.class)
+    public ProblemDetail handleInvalidStatusUpdate(AuthExceptions.InvalidStatusUpdateException ex) {
+        return buildProblem(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
     @ExceptionHandler(AuthExceptions.UnauthorizedException.class)
     public ProblemDetail handleUnauthorized(AuthExceptions.UnauthorizedException ex) {
         return buildProblem(HttpStatus.FORBIDDEN, ex.getMessage());
