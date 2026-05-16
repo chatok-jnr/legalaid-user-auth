@@ -10,7 +10,6 @@ import com.legalaid.userauth.entity.Role;
 import com.legalaid.userauth.entity.User;
 import com.legalaid.userauth.entity.UserRole;
 import com.legalaid.userauth.entity.UserRoleId;
-import com.legalaid.userauth.entity.admin.AdminProfile;
 import com.legalaid.userauth.entity.lawyer.LawyerCredential;
 import com.legalaid.userauth.entity.lawyer.LawyerProfile;
 import com.legalaid.userauth.entity.lawyer.LawyerStatus;
@@ -73,18 +72,15 @@ public class LawyerServiceImpl implements LawyerService {
                 .build();
 
 
-        Role role = roleRepository.findByName(Role.RoleName.LAWYER)
-                .orElseThrow(AuthExceptions.RoleNotFoundException::new);
+//        UserRoleId userRoleId = new UserRoleId(user.getId(), role.getId());
+//
+//        UserRole userRole = UserRole.builder()
+//                        .id(userRoleId)
+//                        .role(role)
+//                        .user(user)
+//                        .build();
 
-        UserRoleId userRoleId = new UserRoleId(user.getId(), role.getId());
-
-        UserRole userRole = UserRole.builder()
-                        .id(userRoleId)
-                        .role(role)
-                        .user(user)
-                        .build();
-
-        userRoleRepository.save(userRole);
+        //userRoleRepository.save(userRole);
         lawyerRepository.save(lawyerProfile);
 
         return buildProfileResponse(lawyerProfile);
@@ -114,13 +110,16 @@ public class LawyerServiceImpl implements LawyerService {
                 .orElseThrow(() -> new AuthExceptions.UserNotFoundException("User not found"));
 
         LawyerProfileProjection lawyerProfile = lawyerRepository.findLawyerProfileById(user.getId());
+        if (lawyerProfile == null) {
+            throw new AuthExceptions.LawyerNotFoundException();
+        }
 
         return LawyerResponse.LawyerProfileResponse.builder()
                 .barNumber(lawyerProfile.getBarNumber())
                 .bio(lawyerProfile.getBio())
                 .specializations(lawyerProfile.getSpecializations())
                 .yearsExperience(lawyerProfile.getYearsExperience())
-                .isVerified(lawyerProfile.getIsVerified())
+                .isVerified(toPrimitiveBoolean(lawyerProfile.getIsVerified()))
                 .credentials(parseDocuments(lawyerProfile.getCredentials()))
                 .build();
     }
@@ -133,6 +132,9 @@ public class LawyerServiceImpl implements LawyerService {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AuthExceptions.UserNotFoundException("User not found"));
+
+        lawyerRepository.findById(user.getId())
+                .orElseThrow(AuthExceptions.LawyerNotFoundException::new);
 
         String documentUrl = cloudinaryService.uploadDocument(document);
         return LawyerResponse.DocumentUploadResponse.builder()
@@ -216,9 +218,26 @@ public class LawyerServiceImpl implements LawyerService {
 
         lawyerProfile.setStatus(LawyerStatus.valueOf(status.toUpperCase()));
         if(status.toUpperCase().equals("APPROVED")) {
+          
             lawyerProfile.setIsVerified(true);
             lawyerProfile.setVerifiedAt(Instant.now());
             lawyerProfile.setVerifiedBy(admin.getId());
+
+            Role role = roleRepository.findByName(Role.RoleName.LAWYER)
+                    .orElseThrow(AuthExceptions.RoleNotFoundException::new);
+
+            UserRoleId userRoleId = new UserRoleId(lawyerProfile.getId(), role.getId());
+
+            User user = userRepository.findById(lawyerProfile.getId())
+                    .orElseThrow(() -> new AuthExceptions.UserNotFoundException("User with ID " + lawyerProfile.getId() + "not found"));
+
+            UserRole userRole = UserRole.builder()
+                            .id(userRoleId)
+                            .role(role)
+                            .user(user)
+                            .build();
+
+            userRoleRepository.save(userRole);
         }
 
         lawyerRepository.save(lawyerProfile);
@@ -235,8 +254,12 @@ public class LawyerServiceImpl implements LawyerService {
                 .bio(request.getBio())
                 .specializations(request.getSpecializations())
                 .yearsExperience(request.getYearsExperience())
-                .isVerified(request.getIsVerified())
+                .isVerified(toPrimitiveBoolean(request.getIsVerified()))
                 .build();
+    }
+
+    private boolean toPrimitiveBoolean(Boolean value) {
+        return Boolean.TRUE.equals(value);
     }
 
     private List<LawyerResponse.Document> parseDocuments(String credentials) {
@@ -262,7 +285,5 @@ public class LawyerServiceImpl implements LawyerService {
         }
     }
 }
-
-
 
 

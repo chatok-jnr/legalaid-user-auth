@@ -44,8 +44,9 @@ public class LawyerProfile {
     @Column(name = "years_experience")
     private short yearsExperience;
 
+    @Builder.Default
     @Column(name = "is_verified")
-    private Boolean isVerified;
+    private Boolean isVerified = false;
 
     @Enumerated(EnumType.STRING)
     @JdbcType(PostgreSQLEnumJdbcType.class)
@@ -66,4 +67,11 @@ public class LawyerProfile {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Instant updatedAt;
+
+    @PrePersist
+    void applyDefaults() {
+        if (isVerified == null) {
+            isVerified = false;
+        }
+    }
 }

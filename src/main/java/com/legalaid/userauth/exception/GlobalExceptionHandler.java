@@ -6,6 +6,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -137,6 +138,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthExceptions.InvalidUploadException.class)
     public ProblemDetail handleInvalidUpload(AuthExceptions.InvalidUploadException ex) {
         return buildProblem(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ProblemDetail handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex) {
+        return buildProblem(HttpStatus.PAYLOAD_TOO_LARGE, "File size must not exceed 10MB");
     }
 
     @ExceptionHandler(AuthExceptions.CloudinaryUploadException.class)

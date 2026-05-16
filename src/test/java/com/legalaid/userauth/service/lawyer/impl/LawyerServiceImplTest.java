@@ -1,5 +1,6 @@
 package com.legalaid.userauth.service.lawyer.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.legalaid.userauth.dto.request.lawyer.LawyerRequest;
 import com.legalaid.userauth.entity.User;
 import com.legalaid.userauth.entity.lawyer.LawyerProfile;
@@ -8,6 +9,7 @@ import com.legalaid.userauth.repository.RoleRepository;
 import com.legalaid.userauth.repository.UserRepository;
 import com.legalaid.userauth.repository.UserRoleRepository;
 import com.legalaid.userauth.repository.lawyer.LawyerRepository;
+import com.legalaid.userauth.repository.lawyer.projection.LawyerProfileProjection;
 import com.legalaid.userauth.service.cloudinary.CloudinaryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -39,6 +41,7 @@ class LawyerServiceImplTest {
     @Mock RoleRepository roleRepository;
     @Mock UserRoleRepository userRoleRepository;
     @Mock CloudinaryService cloudinaryService;
+    @Mock ObjectMapper objectMapper;
 
     @InjectMocks LawyerServiceImpl lawyerService;
 
@@ -89,6 +92,33 @@ class LawyerServiceImplTest {
     }
 
     @Test
+    @DisplayName("should treat missing verification value as false")
+    void shouldTreatMissingVerificationValueAsFalse() {
+        LawyerProfileProjection projection = org.mockito.Mockito.mock(LawyerProfileProjection.class);
+
+        when(userRepository.findByEmail("lawyer@example.com")).thenReturn(Optional.of(lawyerUser));
+        when(lawyerRepository.findLawyerProfileById(lawyerUser.getId())).thenReturn(projection);
+        when(projection.getBarNumber()).thenReturn("BAR-12345");
+        when(projection.getBio()).thenReturn("Experienced attorney");
+        when(projection.getYearsExperience()).thenReturn((short) 10);
+        when(projection.getIsVerified()).thenReturn(null);
+
+        var response = lawyerService.getLawyerProfile("lawyer@example.com");
+
+        assertThat(response.isVerified()).isFalse();
+    }
+
+    @Test
+    @DisplayName("should reject missing lawyer profile projection")
+    void shouldRejectMissingLawyerProfileProjection() {
+        when(userRepository.findByEmail("lawyer@example.com")).thenReturn(Optional.of(lawyerUser));
+        when(lawyerRepository.findLawyerProfileById(lawyerUser.getId())).thenReturn(null);
+
+        assertThatThrownBy(() -> lawyerService.getLawyerProfile("lawyer@example.com"))
+                .isInstanceOf(AuthExceptions.LawyerNotFoundException.class);
+    }
+
+    @Test
     @DisplayName("should reject non-lawyer users")
     void shouldRejectMissingLawyerProfile() {
         var file = new MockMultipartFile("document", "id.pdf", "application/pdf", "content".getBytes());
@@ -100,4 +130,3 @@ class LawyerServiceImplTest {
         verify(cloudinaryService, never()).uploadDocument(any());
     }
 }
-

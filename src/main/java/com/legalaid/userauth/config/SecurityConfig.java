@@ -39,6 +39,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // ── Public endpoints ───────────────────────────────────────
                 .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login", "/auth/refresh").permitAll()
+                .requestMatchers(HttpMethod.POST, "/auth/lawyer/profile/document").hasRole("LAWYER")
                 // ── Admin-only ────────────────────────────────────────────
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 // ── Lawyer access ─────────────────────────────────────────
